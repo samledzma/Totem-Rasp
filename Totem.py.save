@@ -1,0 +1,15 @@
+import time
+import LCD_I2C
+
+LCD_I2C.lcd_init()
+
+msgToScreen = list()
+
+def def reset_screen():
+    msgToScreen.append("RESET\nRESET") def login():
+    p2.lcd_init()	while True:
+		LCD_I2C.lcd_print("   BIENVENIDO   ",LCD_I2C.LCD_LINE_1)
+		LCD_I2C.lcd_print(" A  ELECTROBIKE ",LCD_I2C.LCD_LINE_2)
+		time.sleep(3)
+
+
