@@ -1,0 +1,106 @@
+
+#!/usr/bin/env python
+
+
+import RPi.GPIO as GPIO
+import time
+import LCD_I2C
+import RFID
+import threading
+import tarjetasUID
+
+reader = RFID.RFID()
+LCD_I2C.lcd_init()
+
+
+control = 37
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(control, GPIO.OUT)
+
+
+import serial
+ser = serial.Serial(
+    port='/dev/serial0',
+    baudrate = 9600,
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=1
+           )
+
+
+def login():
+    while True:
+      print "inicio"
+      LCD_I2C.lcd_print("   BIENVENIDO   ",LCD_I2C.LCD_LINE_1)
+      LCD_I2C.lcd_print("A CASA LAS VELAS",LCD_I2C.LCD_LINE_2)
+      time.sleep(0.05)
+      try:
+        id, text = reader.read()
+      finally:
+        GPIO.cleanup()
+      LCD_I2C.lcd_reset()
+      LCD_I2C.lcd_print("   DETECTANDO   ",LCD_I2C.LCD_LINE_1) 
+      LCD_I2C.lcd_print("     TARJETA    ",LCD_I2C.LCD_LINE_2)
+      time.sleep(3)
+      print(id)
+      if id in tarjetasUID.list:
+        LCD_I2C.lcd_reset()
+        LCD_I2C.lcd_print("    TARJETA     ",LCD_I2C.LCD_LINE_1)
+        LCD_I2C.lcd_print("     VALIDA     ",LCD_I2C.LCD_LINE_2)
+        time.sleep(3)
+        if id == 584184666632:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("        1       ",LCD_I2C.LCD_LINE_2)
+          ser.write('REQU|14*')
+          ser.flush()
+          while ser.inWaiting() > 0:
+            txt += ser.read(1)
+            print txt
+            txt = ' '
+          time.sleep(3)
+        if id == 584191169753:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("       2        ",LCD_I2C.LCD_LINE_2)
+          time.sleep(3)
+          ser.write('OPEN|1*')
+        if id == 584191577096:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("        3       ",LCD_I2C.LCD_LINE_2)
+          time.sleep(3)
+          ser.write('OPEN|1*')
+        if id == 584188868453:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("        4       ",LCD_I2C.LCD_LINE_2)
+          time.sleep(3)
+          ser.write('OPEN|1*')
+        if id == 584190119981:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("        5       ",LCD_I2C.LCD_LINE_2)
+          time.sleep(3)
+          ser.write('OPEN|1*')
+        if id == 584198349313:
+          LCD_I2C.lcd_print("  TOME LA BICI  ",LCD_I2C.LCD_LINE_1)
+          LCD_I2C.lcd_print("        6       ",LCD_I2C.LCD_LINE_2)
+          time.sleep(3)
+          ser.write('OPEN|1*')
+      else:
+        LCD_I2C.lcd_reset()
+        LCD_I2C.lcd_print("    TARJETA     ",LCD_I2C.LCD_LINE_1)
+        LCD_I2C.lcd_print("   INVALIDA     ",LCD_I2C.LCD_LINE_2)
+        time.sleep(3)
+        LCD_I2C.lcd_print("INTENTE DE NUEVO",LCD_I2C.LCD_LINE_1)
+        LCD_I2C.lcd_print("   POR FAVOR    ",LCD_I2C.LCD_LINE_2)
+        time.sleep(3)
+
+
+threads = list()
+t1 = threading.Thread(target=login)
+threads.append(t1)
+t1.start()
+
+while True:
+  print "Terminal"
+  texto = raw_input("SEND COMMAND: ")
+  ser.write(texto)
+
